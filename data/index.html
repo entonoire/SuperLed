@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Super LED</title>
+</head>
+<body>
+    <header>
+        <p class="title">SUPER LED</p>
+    </header>
+    
+    <main>
+        <div class="button_wrapper">
+            <div class="toggle_wrapper">
+                <p class="toggle_text">on off</p>
+                <input type="checkbox" class="toggle" checked>
+                <span class="round"></span>
+            </div>
+            <button class="save">save</button>
+        </div>
+
+        <div class="control_wrapper">
+            <div class="slider_wrapper">
+                <div class="slider">
+                    <input type="range"
+                        class="range r"
+                        min="0"
+                        max="255"
+                        value="255">
+                </div>
+
+                <div class="slider">
+                    <input type="range"
+                        class="range g"
+                        min="0"
+                        max="255"
+                        value="0">
+                </div>
+
+                <div class="slider">
+                    <input type="range"
+                        class="range b"
+                        min="0"
+                        max="255"
+                        value="0">
+                </div>
+            </div>
+            <div class="selector_wrapper">
+                <div class="input_wrapper">
+                    <input id="rInput" value="0" min="0" max="255" type="number">
+                    <div class="arrows">
+                        <a id="rInputDown">
+                            <img src="./assets/angle-down-solid-full.svg"></img>
+                        </a>
+                        <a id="rInputUp">
+                            <img src="./assets/angle-up-solid-full.svg"></img>
+                        </a>
+                    </div>
+                </div>
+                <div class="input_wrapper">
+                    <input id="gInput" value="0" min="0" max="255" type="number">
+                    <div class="arrows">
+                        <a id="gInputDown">
+                            <img src="./assets/angle-down-solid-full.svg"></img>
+                        </a>
+                        <a id="gInputUp">
+                            <img src="./assets/angle-up-solid-full.svg"></img>
+                        </a>
+                    </div>
+                </div>
+                <div class="input_wrapper">
+                    <input id="bInput" value="0" min="0" max="255" type="number">
+                    <div class="arrows">
+                        <a id="bInputDown">
+                            <img src="./assets/angle-down-solid-full.svg"></img>
+                        </a>
+                        <a id="bInputUp">
+                            <img src="./assets/angle-up-solid-full.svg"></img>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenery_wrapper">
+            <p>Sceneries</p>
+            <div class="line"></div>
+            <div class="sceneries">
+                <div class="scene" id="0">RGB</div>
+                <div class="scene" id="1">FADE</div>
+                <div class="scene" id="3">BLINK</div>
+                <div class="scene" id="2">OFF</div>
+            </div>
+        </div>
+
+        <div class="color_wrapper">
+            <div class="color_header">
+                <p>Colors</p>
+                <button id="colorWheelBtn">Color Wheel</button>
+                <input type="color" id="colorPicker" style="display:none;">
+            </div>
+            <div class="line"></div>
+            <div class="colorscene">
+                <div class="preset color">RED</div>
+                <div class="preset color">LIME</div>
+                <div class="preset color">BLUE</div>
+                <div class="preset color">WHITE</div>
+                <div class="preset color">rgb(255,255,143)</div>
+            </div>
+        </div>
+    </main>
+</body>
+
+<script src="script.js"></script>
+</html>

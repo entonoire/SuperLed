@@ -1,0 +1,315 @@
+@import url('https://fonts.cdnfonts.com/css/digital-numbers');
+@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #432323;
+}
+
+header {
+    --shadow: #ff9d00;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    background-color: #2F5755;
+    box-shadow: 
+        inset 0 0 10px 2px var(--shadow),
+        0 0 15px 0px #0000006d;
+    border-radius: 0 0 5px 5px;
+}
+
+.title {
+    margin: 10px;
+    font-family: 'Digital Numbers', sans-serif;
+    font-size: 32px;
+    background-image: linear-gradient(90deg, red -20%, lime 50%, blue 120%);
+    color: transparent;
+    background-clip: text;
+    background-color: red;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button_wrapper {
+    margin-top: 14px;
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.toggle_wrapper {
+    display: flex;
+}
+
+.control_wrapper {
+    display: flex;
+    background-color: #2F575528;
+    border-radius: 20px;
+    width: 327px;
+    height: 315px;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.selector_wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 32px;
+}
+
+.input_wrapper {
+    display: flex;
+    height: fit-content;
+}
+
+.input_wrapper input {
+    background-color: #2F575565;
+    border-style: none;
+    appearance: textfield;
+    color: #E0D9D9;
+    font-size: 36px;
+    font-family: "Alumni Sans", sans-serif;
+    text-align: center;
+    padding: 2px;
+    height: 29px;
+    width: 51px;
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    outline: none;
+}
+
+.arrows {
+    width: fit-content;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    background-color: #432323;
+    border-bottom-right-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+.arrows a {
+    display: flex;
+}
+
+.arrows a img {
+    font-family: "Alumni Sans", sans-serif;
+    user-select: none;
+    pointer-events: none;
+    filter: invert(1);
+    width: 12px;
+}
+
+.arrows a:hover img {
+    filter: invert(70%);
+}
+
+.slider_wrapper {
+    margin-bottom: 11px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 50px;
+}
+
+.slider {
+    position: relative;
+    width: 50px;
+    height: 251px;
+    background-color: #2F575565;
+    display: flex;
+    justify-content: center;
+}
+
+/* base input */
+.range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 251px;
+    height: 3px;
+    transform: rotate(-90deg);
+    background: #5A9690;
+    position: absolute;
+    top: 124px;
+    cursor: pointer;
+}
+
+/* curseur */
+.range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 44px;
+    width: 10px;
+    border-radius: 2px;
+    background: red;
+    border-style: none;
+}
+
+.range.g::-webkit-slider-thumb { background: lime; }
+.range.b::-webkit-slider-thumb  { background: blue; }
+
+/* Firefox */
+.range::-moz-range-thumb {
+    height: 44px;
+    width: 10px;
+    border-radius: 2px;
+    background: red;
+    border-style: none;
+}
+.range.g::-moz-range-thumb { background: lime; }
+.range.b::-moz-range-thumb  { background: blue; }
+
+.scenery_wrapper, .color_wrapper {
+    margin-left: 18px;
+    display: flex;
+    width: 342px;
+    margin-top: 20px;
+    flex-direction: column;
+}
+
+.scenery_wrapper p, .color_header p{
+    color: #E0D9D9;
+    font-size: 32px;
+    font-family: "Alumni Sans", sans-serif;
+}
+
+.line {
+    background-color: #2F5755;
+    height: 2px;
+}
+
+.sceneries {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.scene, .preset {
+    background-color: #F4991A;
+    width: 65px;
+    height: 51px;
+    border-radius: 5px;
+    color: #E0D9D9;
+    font-size: 20px;
+    font-family: "Alumni Sans", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    margin-top: 10px;
+}
+
+.colorscene {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    gap: 5px;
+    justify-content: space-between;
+}
+
+.preset {
+    font-size: 0px;
+}
+
+.scene {
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 79%);
+}
+
+.scene:hover {
+    transform: scale(1.25);
+    transition: ease-in-out 150ms;
+    box-shadow: 0 0 10px 0px #f4991ad8;
+}
+
+.sceneries:hover .scene:not(:hover) {
+    filter: blur(1px);
+    transition: ease-in-out 150ms;
+}
+
+.color_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.color_header button, .save {
+    background-color: #F4991A;
+    color: #F2EAD3;
+    font-size: 20px;
+    font-family: "Alumni Sans", sans-serif;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    outline: none;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-style: none;
+}
+
+.color_header button:hover, .save:hover {
+    background-color: #f4991ade;
+}
+
+.toggle_wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #00B100;
+    border-radius: 30px;
+    box-shadow: inset 0 0 3.5px 0 black;
+    width: 55px;
+}
+
+.toggle {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle_text {
+    color: #F2EAD3;
+    font-family: "Alumni Sans", sans-serif;
+    font-size: 24px;
+    user-select: none;
+    margin-right: 3px;
+    margin-left: 7px;
+    position: absolute;
+}
+
+.button_wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+}
+
+.save {
+    font-size: 25px;
+}
+
+.toggle:checked ~ .round {
+    transform: translateX(25px);
+    transition: ease-in-out 150ms;
+}
+
+.toggle_wrapper:has(.toggle:not(:checked)) {
+    background-color: #386765;
+}
+
+.round {
+    background-color: #D9D9D9;
+    border-radius: 100%;
+    width: 25px;
+    height: 25px;
+    margin: 2px;
+    transition: ease-in-out 150ms;
+    z-index: 100;
+}

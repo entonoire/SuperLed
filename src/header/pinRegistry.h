@@ -1,0 +1,7 @@
+#define BUTTON_PIN D4
+#define BUTTON_LED_RED_PIN D2
+#define BUTTON_LED_GREEN_PIN D3
+#define BUTTON_LED_BLUE_PIN D1
+#define LED_RED_PIN 13
+#define LED_GREEN_PIN 14
+#define LED_BLUE_PIN 12
