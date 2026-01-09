@@ -125,8 +125,10 @@
     }
 
     /* --- EVENTS --- */
-    sceneList.forEach(scene, () => {
-
+    sceneList.forEach((scene) => {
+        scene.addEventListener("click", () => {
+            setLED(rInput.value, gInput.value, bInput.value, scene.id)
+        })
     })
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -205,25 +207,24 @@
     });
 
     colorPicker.addEventListener("input", (e) => {
-        const color = e.target.value; // format "#rrggbb"
+        const color = e.target.value;
 
-        // converti en R,G,B
         const r = parseInt(color.substr(1,2),16);
         const g = parseInt(color.substr(3,2),16);
         const b = parseInt(color.substr(5,2),16);
 
-        // met à jour sliders et inputs
-        document.getElementById("rInput").value = r;
+        rInput.value = r;
         document.querySelector(".range.r").value = r;
         sliderUpdate("r", document.getElementById("rInput"), false);
 
-        document.getElementById("gInput").value = g;
+        gInput.value = g;
         document.querySelector(".range.g").value = g;
         sliderUpdate("g", document.getElementById("gInput"), false);
 
-        document.getElementById("bInput").value = b;
+        bInput.value = b;
         document.querySelector(".range.b").value = b;
         sliderUpdate("b", document.getElementById("bInput"), false);
+        // TODO: change by a one full request
     });
 
     /* on/off */
