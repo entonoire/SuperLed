@@ -20,12 +20,23 @@
                 bg[0],
                 bg[1],
                 bg[2],
-                0)
+                0, true)
         })
         colorscene.appendChild(preset)
     }
 
     /* --- COLOR CHANGE --- */
+    function updateWeb(r, g, b) {
+        rInput.value = r;
+        document.querySelector(".range.r").value = r;
+
+        gInput.value = g;
+        document.querySelector(".range.g").value = g;
+
+        bInput.value = b;
+        document.querySelector(".range.b").value = b;
+    }
+
     function updateHeader() {
         document.querySelector("header").style
             .setProperty("--shadow", getCurrentRGB())
@@ -67,15 +78,15 @@
     }
 
     /* --- REQUEST --- */
-    const setUrl = "http://192.168.1.143/set?"
-    const getUrl = "http://192.168.1.143/get"
-    const saveUrl = "http://192.168.1.143/save?"
-    const loadUrl = "http://192.168.1.143/load"
+    const setUrl = "http://192.168.1.64/set?"
+    const getUrl = "http://192.168.1.64/get"
+    const saveUrl = "http://192.168.1.64/save?"
+    const loadUrl = "http://192.168.1.64/load"
     
     function saveColor(textRgb) {
         fetch(`${saveUrl}content=${textRgb};`)
             .then(res => res.text())
-            .then(console.log); // affiche "saved!"
+            .then(console.log);
     }
 
     function setR(r) {
@@ -106,7 +117,17 @@
         .catch(err => console.error(err));
     }
 
-    function setLED(r, g, b, scene) {
+    let ledCooldown
+    function setLED(r, g, b, scene, instant) {
+        if (ledCooldown && !instant) return;
+
+        if (!instant) {
+            ledCooldown = true;
+            setTimeout(() => {
+                ledCooldown = false
+            }, 250);
+        }
+
         if (!checkbox.checked) return;
         const url = `${setUrl}r=${r}&g=${g}&b=${b}&scene=${scene}`;
         fetch(url)
@@ -127,7 +148,7 @@
     /* --- EVENTS --- */
     sceneList.forEach((scene) => {
         scene.addEventListener("click", () => {
-            setLED(rInput.value, gInput.value, bInput.value, scene.id)
+            setLED(rInput.value, gInput.value, bInput.value, scene.id, true)
         })
     })
 
@@ -209,22 +230,13 @@
     colorPicker.addEventListener("input", (e) => {
         const color = e.target.value;
 
+        // convert to rgb
         const r = parseInt(color.substr(1,2),16);
         const g = parseInt(color.substr(3,2),16);
         const b = parseInt(color.substr(5,2),16);
 
-        rInput.value = r;
-        document.querySelector(".range.r").value = r;
-        sliderUpdate("r", document.getElementById("rInput"), false);
-
-        gInput.value = g;
-        document.querySelector(".range.g").value = g;
-        sliderUpdate("g", document.getElementById("gInput"), false);
-
-        bInput.value = b;
-        document.querySelector(".range.b").value = b;
-        sliderUpdate("b", document.getElementById("bInput"), false);
-        // TODO: change by a one full request
+        updateWeb(r, g, b);
+        setLED(r, g, b, 0, false);
     });
 
     /* on/off */
@@ -237,7 +249,7 @@
                 document.getElementById("rInput").value,
                 document.getElementById("gInput").value,
                 document.getElementById("bInput").value,
-                0)
+                0, true)
         }
     })
 
@@ -255,10 +267,11 @@
         const bg = getComputedStyle(el).backgroundColor
             .match(/\d+/g).map(Number); // to table
         el.addEventListener("click", () => {
+            updateWeb(bg[0], bg[1], bg[2])
             setLED(
                 bg[0],
                 bg[1],
                 bg[2],
-                0)
+                0, true)
         })
     })

@@ -7,8 +7,8 @@
 #include "header/button.h"
 
 const char* saveFileName = "/save.txt";
-const char* ssid = "Freebox_de_combat";
-const char* password = "KKtfzshRjF";
+const char* ssid = "Box8_De_Combat";
+const char* password = "puxlyrnyf5pkcjbsngwg";
 
 ESP8266WebServer server(80);
 
