@@ -23,9 +23,6 @@ void setup() {
 void loop() {
     Time::currentMillis = millis();
     loopScenery();
-    while (WiFi.status() != WL_CONNECTED) {
-        setupWeb();
-    }
     handle();
     readButton();
     // updateOled();

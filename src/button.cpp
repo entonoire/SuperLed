@@ -14,13 +14,13 @@ bool isPressed = false;
 bool webUpdate = false;
 
 namespace BTN {
-    inline void ledRGB(uint8_t r, uint8_t g, uint8_t b) {
+    void ledRGB(uint8_t r, uint8_t g, uint8_t b) {
         analogWrite(BUTTON_LED_RED_PIN,   255 - r);
         analogWrite(BUTTON_LED_GREEN_PIN, 255 - g);
         analogWrite(BUTTON_LED_BLUE_PIN,  255 - b);
     }
 
-    inline void ledOff() {
+    void ledOff() {
         ledRGB(0, 0, 0);
     }
 

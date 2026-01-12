@@ -78,10 +78,10 @@
     }
 
     /* --- REQUEST --- */
-    const setUrl = "http://192.168.1.64/set?"
-    const getUrl = "http://192.168.1.64/get"
-    const saveUrl = "http://192.168.1.64/save?"
-    const loadUrl = "http://192.168.1.64/load"
+    const setUrl = "http://192.168.1.65/set?"
+    const getUrl = "http://192.168.1.65/get"
+    const saveUrl = "http://192.168.1.65/save?"
+    const loadUrl = "http://192.168.1.65/load"
     
     function saveColor(textRgb) {
         fetch(`${saveUrl}content=${textRgb};`)
