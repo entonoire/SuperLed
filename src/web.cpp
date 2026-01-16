@@ -10,6 +10,10 @@
 #include "header/pinRegistry.h"
 #include "header/file.h"
 
+namespace WEB {
+    String debug = "none";
+}
+
 // ====================== WIFI ======================
 
 const char* ssid     = "Box8_De_Combat";
@@ -19,19 +23,20 @@ ESP8266WebServer server(80);
 
 // ====================== HANDLERS ======================
 
+//load saved colors
 void handleLoad() {
     server.sendHeader("Access-Control-Allow-Origin", "*");
 
-    if (SAVE::busy) {
-        server.send(503, "application/json", "{}");
-        return;
-    }
+    // if (SAVE::busy) {
+    //     server.send(503, "application/json", "{}");
+    //     return;
+    // }
 
-    SAVE::busy = true;
+    // SAVE::busy = true;
 
     File file = SAVE::openRead();
     if (!file || file.size() == 0) {
-        SAVE::busy = false;
+        // SAVE::busy = false;
         server.send(200, "application/json", "{}");
         return;
     }
@@ -40,7 +45,7 @@ void handleLoad() {
     DeserializationError err = deserializeJson(doc, file);
     file.close();
 
-    SAVE::busy = false;
+    // SAVE::busy = false;
 
     if (err) {
         server.send(200, "application/json", "{}");
@@ -73,11 +78,13 @@ void setupRequests() {
         BTN::sendUpdate();
         LED_ColorRGB();
 
-        if (!SAVE::busy) {
-            SAVE::busy = true;
-            SAVE::sendLastState();
-            SAVE::busy = false;
-        }
+        // if (!SAVE::busy) {
+        //     SAVE::busy = true;
+        //     SAVE::sendLastState();
+        //     SAVE::busy = false;
+        // }
+        SAVE::sendLastState();
+
 
         server.sendHeader("Access-Control-Allow-Origin", "*");
         server.send(200);
@@ -112,21 +119,25 @@ void setupRequests() {
             return;
         }
 
-        if (SAVE::busy) {
-            server.send(503, "text/plain", "FS busy");
-            return;
-        }
+        // if (SAVE::busy) {
+        //     server.send(503, "text/plain", "FS busy");
+        //     return;
+        // }
 
-        SAVE::busy = true;
+        // SAVE::busy = true;
         const char* res = SAVE::saveColors(server.arg("content"));
-        SAVE::busy = false;
+        // SAVE::busy = false;
 
         server.send(200, "text/plain", res);
     });
 
     // --- FAVICON (important) ---
     server.on("/favicon.ico", HTTP_GET, []() {
-        server.send(204);
+        server.send(200);
+    });
+
+    server.on("/debug", HTTP_GET, []() {
+        server.send(200, "text/plain", WEB::debug);
     });
 }
 
@@ -137,7 +148,6 @@ void loadIndex() {
 
     // Static file server (index.html, js, css, etc.)
     server.serveStatic("/", LittleFS, "/");
-
     server.begin();
 }
 
@@ -149,6 +159,13 @@ void setupWeb() {
     digitalWrite(LED_RED_PIN, HIGH);
     BTN::ledOff();
 
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);
+    WiFi.config(
+        IPAddress(192,168,1,65),
+        IPAddress(192,168,1,1),
+        IPAddress(255,255,255,0)
+    );
     WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED) {
@@ -166,6 +183,9 @@ void setupWeb() {
     if (!LittleFS.begin()) {
         BTN::ledRGB(255, 0, 255); // FS error
         return;
+    }
+    else {
+        BTN::tempLED();
     }
 
     loadIndex();

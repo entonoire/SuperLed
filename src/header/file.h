@@ -4,5 +4,6 @@ namespace SAVE {
     bool exist();
     File openRead();
     const char* saveColors(const String& newColor);
-    extern bool busy;
+    void applyLastScene();
+    // extern bool busy;
 }

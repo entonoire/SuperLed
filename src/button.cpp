@@ -5,13 +5,16 @@
 #include "header/scenery.h"
 #include "header/main.h"
 #include "header/pinRegistry.h"
+#include "header/file.h"
 
 unsigned long buttonDelay = 0;
 unsigned long updateResetDelay = 0;
 unsigned long pressStart = 0;
+unsigned long ledOffDelay = 0;
 
 bool isPressed = false;
 bool webUpdate = false;
+bool offDelay = false;
 
 namespace BTN {
     void ledRGB(uint8_t r, uint8_t g, uint8_t b) {
@@ -29,6 +32,11 @@ namespace BTN {
         webUpdate = true;
         updateResetDelay = Time::currentMillis;
     }
+
+    void tempLED() {
+        ledOffDelay = Time::currentMillis;
+        offDelay = true;
+    }
 }
 
 void setupButton() {
@@ -36,11 +44,14 @@ void setupButton() {
     pinMode(BUTTON_LED_RED_PIN, OUTPUT);
     pinMode(BUTTON_LED_GREEN_PIN, OUTPUT);
     pinMode(BUTTON_LED_BLUE_PIN, OUTPUT);
+    buttonDelay = 0;
+    updateResetDelay = 0;
+    pressStart = 0;
+    ledOffDelay = 0;
     BTN::ledOff();
 }
 
 uint8_t pressCount = 0;
-
 void readButton() {
     unsigned long now = Time::currentMillis;
 
@@ -96,18 +107,20 @@ void readButton() {
             case 1:
                 setScenery(OFF);
                 BTN::ledRGB(255, 0, 0);
+                BTN::tempLED(); 
                 break;
             case 2:
-                LED_ColorRGB(0, 0, 0);
-                setScenery(FADE);
-                BTN::ledRGB(0, 255, 0);
-                break;
-            case 3:
-                LED_ColorRGB(0, 100, 0);
-                setScenery(BLINK);
-                BTN::ledRGB(0, 0, 255);
+                SAVE::applyLastScene();
+                BTN::ledRGB(LED::pwmRed, LED::pwmGreen, LED::pwmBlue);
+                BTN::tempLED();
                 break;
         }
         pressCount = 0;
+    }
+
+    if (offDelay && now - ledOffDelay >= 5000) {
+        BTN::ledOff();
+        ledOffDelay = 0;
+        offDelay = false;
     }
 }

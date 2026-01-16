@@ -2,18 +2,39 @@
 #include <LittleFS.h>
 #include "header/led.h"
 #include "header/scenery.h"
+#include "header/web.h"
 
 const char* saveFileName = "/save.json";
 
 namespace SAVE {
-    bool busy = false;
+    // bool busy = false;
+
+    void applyLastScene() {
+            JsonDocument doc;
+            File file = LittleFS.open(saveFileName, "r");
+            if (deserializeJson(doc, file) != DeserializationError::Ok) {
+                file.close();
+                return;
+            }
+            file.close();
+
+            JsonArray lastArray = doc["last"].as<JsonArray>();
+            int r = lastArray[0];
+            int g = lastArray[1];
+            int b = lastArray[2];
+            Scenery scene = static_cast<Scenery>(lastArray[3]);
+            LED_ColorRGB(r, g, b);
+            setScenery(scene);
+    }
 
     // ================= INIT =================
     void init() {
-        if (LittleFS.exists(saveFileName)) return;
+        if (LittleFS.exists(saveFileName)) {
+            applyLastScene();
+            return;
+        }
 
         JsonDocument doc;
-        // Crée "last" array
         JsonArray lastArray = doc["last"].to<JsonArray>();
         lastArray.add(0); // r
         lastArray.add(0); // g
@@ -32,16 +53,16 @@ namespace SAVE {
 
     // ================= SEND LAST STATE =================
     void sendLastState() {
-        if (busy) return;
-        busy = true;
+        // if (busy) return;
+        // busy = true;
 
         File file = LittleFS.open(saveFileName, "r");
-        if (!file) { busy = false; return; }
+        // if (!file) { busy = false; return; }
 
         JsonDocument doc;
         if (deserializeJson(doc, file) != DeserializationError::Ok) {
             file.close();
-            busy = false;
+            // busy = false;
             return;
         }
         file.close();
@@ -58,7 +79,7 @@ namespace SAVE {
             file.close();
         }
 
-        busy = false;
+        // busy = false;
     }
 
     // ================= CHECK EXISTENCE =================
@@ -73,19 +94,19 @@ namespace SAVE {
 
     // ================= SAVE NEW COLOR =================
     const char* saveColors(const String& newColor) {
-        if (busy) return "FS busy";
-        busy = true;
+        // if (busy) return "FS busy";
+        // busy = true;
 
-        File file = openRead();
+        File file = LittleFS.open(saveFileName, "r");
         if (!file) {
-            busy = false;
+            // busy = false;
             return "failed to open file";
         }
 
         JsonDocument doc;
         if (deserializeJson(doc, file) != DeserializationError::Ok) {
             file.close();
-            busy = false;
+            // busy = false;
             return "JSON error";
         }
         file.close();
@@ -99,7 +120,7 @@ namespace SAVE {
             file.close();
         }
 
-        busy = false;
+        // busy = false;
         return "saved!";
     }
 

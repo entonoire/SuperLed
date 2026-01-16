@@ -154,25 +154,35 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         fetch(loadUrl)
-            .then(res => res.text())
-            .then(data => {
-                console.log("RAW data:", data);
-                const colors = data.split(";").filter(c => c);
-                console.log("Colors array:", colors);
-
-                colors.forEach(c => {
-                    createPreset(c)
-                })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error");
+                return res.json();
             })
-            .catch(console.error);
+            .then(data => {
+                console.log("JSON data:", data);
+    
+                // sécurité
+                if (!data || !Array.isArray(data.save)) return;
+    
+                data.save.forEach(c => {
+                    createPreset(c); // c = "rgb(255,0,0)" ou "[255,0,0]"
+                });
+    
+                // optionnel : restaurer le dernier état
+                if (Array.isArray(data.last)) {
+                    const [r, g, b, scene] = data.last;
+                    console.log("Last state:", r, g, b, scene);
+                    // set sliders / UI ici si tu veux
+                }
+            })
+            .catch(err => {
+                console.error("Load error:", err);
+            });
     });
 
+    // save
     saveBtn.addEventListener("click", () => {
         const rgb = getCurrentRGB();
-        // if (colorExists(rgb)) {
-        //     alert("Cette couleur est déjà sauvegardée !");
-        //     return;
-        // }
         saveColor(rgb+";")
         console.log(rgb+";")
         createPreset(rgb);
