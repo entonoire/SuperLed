@@ -2,137 +2,196 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <LittleFS.h>
+#include <ArduinoJson.h>
+
 #include "header/scenery.h"
 #include "header/led.h"
 #include "header/button.h"
+#include "header/pinRegistry.h"
+#include "header/file.h"
 
-const char* saveFileName = "/save.txt";
-const char* ssid = "Box8_De_Combat";
+namespace WEB {
+    String debug = "none";
+}
+
+// ====================== WIFI ======================
+
+const char* ssid     = "Box8_De_Combat";
 const char* password = "puxlyrnyf5pkcjbsngwg";
 
 ESP8266WebServer server(80);
 
+// ====================== HANDLERS ======================
+
+//load saved colors
 void handleLoad() {
     server.sendHeader("Access-Control-Allow-Origin", "*");
 
-    if (!LittleFS.exists(saveFileName)) {
-        server.send(200, "text/plain", ""); // fichier vide
+    // if (SAVE::busy) {
+    //     server.send(503, "application/json", "{}");
+    //     return;
+    // }
+
+    // SAVE::busy = true;
+
+    File file = SAVE::openRead();
+    if (!file || file.size() == 0) {
+        // SAVE::busy = false;
+        server.send(200, "application/json", "{}");
         return;
     }
 
-    File file = LittleFS.open(saveFileName, "r");
-    if (!file) {
-        server.send(500, "text/plain", "Failed to open file");
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, file);
+    file.close();
+
+    // SAVE::busy = false;
+
+    if (err) {
+        server.send(200, "application/json", "{}");
         return;
     }
 
-    // Utiliser server.streamFile pour envoyer le fichier directement
-    server.streamFile(file, "text/plain");
-
-    file.close();
+    String out;
+    serializeJson(doc, out);
+    server.send(200, "application/json", out);
 }
 
-const char* saveColors(const String& newColor) {
-    File file = LittleFS.open(saveFileName, "a"); // append et crée si inexistant
-    if (!file) {
-        return "failed to open file";
-    }
-
-    String colorToSave = newColor;
-    if (!newColor.endsWith(";")) colorToSave += ";";
-
-    file.print(colorToSave); // ex: "rgb(255,0,0);"
-    file.close();
-    return "saved!";
-}
+// ====================== ROUTES ======================
 
 void setupRequests() {
+
+    // --- SET RGB / SCENE ---
     server.on("/set", HTTP_GET, []() {
-        // URL: /set?r=255&g=0&b=0&scene=1
-        if (server.hasArg("r")) {
-            LED::pwmRed = server.arg("r").toInt();
-        }
-        if (server.hasArg("g")) {
-            LED::pwmGreen = server.arg("g").toInt();
-        }
-        if (server.hasArg("b")) {
-            LED::pwmBlue = server.arg("b").toInt();
-        }
+
+        if (server.hasArg("r")) LED::pwmRed   = server.arg("r").toInt();
+        if (server.hasArg("g")) LED::pwmGreen = server.arg("g").toInt();
+        if (server.hasArg("b")) LED::pwmBlue  = server.arg("b").toInt();
+
         if (server.hasArg("scene")) {
-            int index = server.arg("scene").toInt();
-            if (index != getSceneryIndex()) {
-                Scenery scene = static_cast<Scenery>(index);
-                setScenery(scene);
+            int s = server.arg("scene").toInt();
+            if (s != getSceneryIndex()) {
+                setScenery(static_cast<Scenery>(s));
             }
         }
 
         BTN::sendUpdate();
         LED_ColorRGB();
-        server.sendHeader("Access-Control-Allow-Origin","*");
+
+        // if (!SAVE::busy) {
+        //     SAVE::busy = true;
+        //     SAVE::sendLastState();
+        //     SAVE::busy = false;
+        // }
+        SAVE::sendLastState();
+
+
+        server.sendHeader("Access-Control-Allow-Origin", "*");
         server.send(200);
     });
 
+    // --- GET CURRENT STATE ---
     server.on("/get", HTTP_GET, []() {
-        server.sendHeader("Access-Control-Allow-Origin","*");
+        server.sendHeader("Access-Control-Allow-Origin", "*");
+
         char buff[32];
-        sprintf(buff, "%d,%d,%d,%d", LED::pwmRed, LED::pwmGreen, LED::pwmBlue, getSceneryIndex());
+        sprintf(
+            buff,
+            "%d,%d,%d,%d",
+            LED::pwmRed,
+            LED::pwmGreen,
+            LED::pwmBlue,
+            getSceneryIndex()
+        );
+
         server.send(200, "text/plain", buff);
     });
 
+    // --- LOAD JSON ---
     server.on("/load", HTTP_GET, handleLoad);
 
+    // --- SAVE COLOR ---
     server.on("/save", HTTP_GET, []() {
+        server.sendHeader("Access-Control-Allow-Origin", "*");
+
         if (!server.hasArg("content")) {
-            server.sendHeader("Access-Control-Allow-Origin","*");
             server.send(400, "text/plain", "Missing content");
             return;
         }
-        server.sendHeader("Access-Control-Allow-Origin","*");
-        server.send(200, "text/plain", saveColors(server.arg("content")));
+
+        // if (SAVE::busy) {
+        //     server.send(503, "text/plain", "FS busy");
+        //     return;
+        // }
+
+        // SAVE::busy = true;
+        const char* res = SAVE::saveColors(server.arg("content"));
+        // SAVE::busy = false;
+
+        server.send(200, "text/plain", res);
+    });
+
+    // --- FAVICON (important) ---
+    server.on("/favicon.ico", HTTP_GET, []() {
+        server.send(200);
+    });
+
+    server.on("/debug", HTTP_GET, []() {
+        server.send(200, "text/plain", WEB::debug);
     });
 }
 
-void loadIndex() {
-    server.on("/", HTTP_GET, []() {
-        File file = LittleFS.open("/index.html", "r");
-        if (!file) {
-            server.send(404, "text/plain", "index.html not found");
-            return;
-        }
-        server.streamFile(file, "text/html");
-        file.close();
-    });
+// ====================== WEB INIT ======================
 
+void loadIndex() {
     setupRequests();
+
+    // Static file server (index.html, js, css, etc.)
     server.serveStatic("/", LittleFS, "/");
     server.begin();
 }
 
+// ====================== SETUP ======================
+
 void setupWeb() {
-    pinMode(D7, OUTPUT);
-    digitalWrite(D7, HIGH); // LED OFF
+
+    pinMode(LED_RED_PIN, OUTPUT);
+    digitalWrite(LED_RED_PIN, HIGH);
+    BTN::ledOff();
+
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);
+    WiFi.config(
+        IPAddress(192,168,1,65),
+        IPAddress(192,168,1,1),
+        IPAddress(255,255,255,0)
+    );
     WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED) {
-        digitalWrite(D7, LOW); // blink
+        digitalWrite(LED_RED_PIN, LOW);
+        BTN::ledRGB(255, 255, 0);
         delay(300);
-        digitalWrite(D7, HIGH);
+        digitalWrite(LED_RED_PIN, HIGH);
+        BTN::ledOff();
         delay(300);
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-        // failed
-        return;
-    }
-
-    digitalWrite(D7, LOW); // LED ON
+    digitalWrite(LED_RED_PIN, LOW);
+    BTN::ledRGB(255, 0, 0);
 
     if (!LittleFS.begin()) {
+        BTN::ledRGB(255, 0, 255); // FS error
         return;
+    }
+    else {
+        BTN::tempLED();
     }
 
     loadIndex();
 }
+
+// ====================== LOOP ======================
 
 void handle() {
     server.handleClient();

@@ -6,6 +6,7 @@
 #include "EEPROM.h"
 #include "header/web.h"
 #include <ESP8266WiFi.h>
+#include "header/file.h"
 
 namespace Time {
     unsigned long currentMillis = millis();
@@ -18,14 +19,12 @@ void setup() {
     setupWeb();
     setupLED();
     // setupOLED();
+    SAVE::init();
 }
 
 void loop() {
     Time::currentMillis = millis();
     loopScenery();
-    while (WiFi.status() != WL_CONNECTED) {
-        setupWeb();
-    }
     handle();
     readButton();
     // updateOled();
